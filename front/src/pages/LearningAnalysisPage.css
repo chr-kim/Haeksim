@@ -191,3 +191,48 @@
 .btn-save:hover {
   background-color: #0069d9;
 }
+
+.ai-teacher-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.btn-ask-ai {
+  background-color: #e6f7ff;
+  color: #007bff;
+  padding: 15px 30px;
+  border: 1px solid #007bff;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-ask-ai:hover {
+  background-color: #cceeff;
+}
+
+.btn-ask-ai svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+}
+
+.chat-popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 400px;
+  height: 600px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}

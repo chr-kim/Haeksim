@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ChatPage from "./ChatPage";
 import './QuizPage.css'; // Import the CSS file
 
 const QuizPage = () => {
@@ -7,6 +8,8 @@ const QuizPage = () => {
   
   // State for the selected multiple-choice answer
   const [selectedAnswer, setSelectedAnswer] = useState(null);
+
+  const [showChat, setShowChat] = useState(false);
   
   // State for the text inputs
   const [answers, setAnswers] = useState(['', '', '', '', '']);
@@ -31,6 +34,12 @@ const QuizPage = () => {
     navigate(-1); // Go back to the previous page
   };
 
+  const handleAskAI = () => {
+    console.log("AI 선생님에게 질문하기 버튼 클릭!");
+    // Implement chat or query functionality
+    setShowChat((prev) => !prev); // 토글 방식으로 챗창 켜기/끄기
+  };
+
   const handleStartNew = () => {
     // Reset all state for a new problem
     setSelectedAnswer(null);
@@ -46,10 +55,10 @@ const QuizPage = () => {
       <header className="quiz-header">
         <div className="logo">Haeksim</div>
         <nav className="header-nav">
-          <a href="#">대시보드</a>
+          <a href="/dashboard">대시보드</a>
           <a href="#" className="active">설정</a>
           <a href="#">리포트</a>
-          <a href="#">로그아웃</a>
+          <a href="/">로그아웃</a>
           <img src="path/to/profile-image.jpg" alt="Profile" className="profile-img" />
         </nav>
       </header>
@@ -149,6 +158,20 @@ const QuizPage = () => {
         </section>
 
         <div className="char-count">총 작성 글자 수: {answers.join('').length}자</div>
+
+        <div className="ai-teacher-section">
+          <button className="btn btn-ask-ai" onClick={handleAskAI}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            AI 선생님에게 질문하기
+          </button>
+        </div>
+        {showChat && (
+        <div className="chat-popup">
+          <ChatPage isPopup={true} />
+        </div>
+        )}
 
         {/* Action Buttons */}
         <div className="action-buttons-container">

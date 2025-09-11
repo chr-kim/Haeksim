@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import ChatPage from './ChatPage';
 import { useNavigate } from 'react-router-dom';
 import './QuizResultPage.css';
 
 const QuizResultPage = () => {
   const navigate = useNavigate();
   const [expandedOption, setExpandedOption] = useState(null);
+  const [showChat, setShowChat] = useState(false);
 
   const toggleExpansion = (optionNumber) => {
     setExpandedOption(expandedOption === optionNumber ? null : optionNumber);
@@ -24,21 +26,16 @@ const QuizResultPage = () => {
     // navigate('/passage-settings'); 
   };
   
-  const handleMainDashboard = () => {
-    console.log("메인 대시보드 버튼 클릭!");
+  const handleSave = () => {
+    console.log("저장 버튼 클릭!");
+    // Implement logic to save the results to the user's profile
     navigate('/dashboard');
   };
   
   const handleAskAI = () => {
-    console.log("AI 선생님에게 질문하기 버튼 클릭!");
-    // Implement chat or query functionality
+    setShowChat((prev) => !prev);
   };
   
-  const handleSummaryPractice = () => {
-    console.log("요약 연습하기 버튼 클릭!");
-    // Navigate to a summary practice page
-    navigate('/summary-practice');
-  };
 
   return (
     <div className="quiz-result-container">
@@ -46,10 +43,10 @@ const QuizResultPage = () => {
       <header className="result-header">
         <div className="logo">Haeksim</div>
         <nav className="header-nav">
-          <a href="#">대시보드</a>
+          <a href="/dashboard">대시보드</a>
           <a href="#" className="active">설정</a>
           <a href="#">리포트</a>
-          <a href="#">로그아웃</a>
+          <a href="/">로그아웃</a>
           <img src="path/to/profile-image.jpg" alt="Profile" className="profile-img" />
         </nav>
       </header>
@@ -125,15 +122,26 @@ const QuizResultPage = () => {
             </div>
           </div>
         </section>
-
-        {/* Action Buttons Section */}
-        <div className="action-buttons">
+       {/* AI Teacher Section */}
+      <div className="ai-teacher-section">
+          <button className="btn btn-ask-ai" onClick={handleAskAI}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            AI 선생님에게 질문하기
+          </button>
+        </div>
+      {/* Action Buttons Section */}
+      <div className="action-buttons">
           <button className="btn btn-new-problem" onClick={handleNewProblem}>새 문제 풀기</button>
-          <button className="btn btn-main-dashboard" onClick={handleMainDashboard}>메인 대시보드</button>
-          <button className="btn btn-ask-ai" onClick={handleAskAI}>AI 선생님에게 질문하기</button>
-          <button className="btn btn-summary-practice" onClick={handleSummaryPractice}>요약 연습하기</button>
+          <button className="btn btn-save" onClick={handleSave}>저장</button>
         </div>
       </main>
+      {showChat && (
+        <div className="chat-popup">
+          <ChatPage isPopup={true} />
+        </div>
+      )}
     </div>
   );
 };

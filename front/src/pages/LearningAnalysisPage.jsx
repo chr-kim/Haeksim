@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+import ChatPage from './ChatPage';
 import { useNavigate } from 'react-router-dom';
 import './LearningAnalysisPage.css';
 
 const LearningAnalysisPage = () => {
   const navigate = useNavigate();
+  const [showChat, setShowChat] = useState(false);
 
   const handleTryAgain = () => {
     console.log("다시 하기 버튼 클릭!");
@@ -11,9 +13,14 @@ const LearningAnalysisPage = () => {
     navigate(-1);
   };
 
+  const handleAskAI = () => {
+    setShowChat((prev) => !prev);
+  };
+
   const handleSave = () => {
     console.log("저장 버튼 클릭!");
     // Implement logic to save the results to the user's profile
+    navigate('/dashboard');
   };
 
   return (
@@ -22,10 +29,10 @@ const LearningAnalysisPage = () => {
       <header className="analysis-header">
         <div className="logo">Haeksim</div>
         <nav className="header-nav">
-          <a href="#">대시보드</a>
+          <a href="/dashboard">대시보드</a>
           <a href="#" className="active">설정</a>
           <a href="#">리포트</a>
-          <a href="#">로그아웃</a>
+          <a href="/">로그아웃</a>
           <img src="path/to/profile-image.jpg" alt="Profile" className="profile-img" />
         </nav>
       </header>
@@ -99,12 +106,26 @@ const LearningAnalysisPage = () => {
           </div>
         </section>
 
+        <div className="ai-teacher-section">
+          <button className="btn btn-ask-ai" onClick={handleAskAI}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            AI 선생님에게 질문하기
+          </button>
+        </div>
+
         {/* Action Buttons */}
         <div className="action-buttons-container">
           <button className="btn btn-try-again" onClick={handleTryAgain}>다시 하기</button>
           <button className="btn btn-save" onClick={handleSave}>저장</button>
         </div>
       </main>
+      {showChat && (
+        <div className="chat-popup">
+          <ChatPage isPopup={true} />
+        </div>
+      )}
     </div>
   );
 };

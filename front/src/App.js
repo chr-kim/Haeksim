@@ -9,6 +9,7 @@ import QuizPage from './pages/QuizPage';
 import QuizResultPage from './pages/QuizResultPage';
 import SummaryPracticePage from './pages/SummaryPracticePage';
 import LearningAnalysisPage from './pages/LearningAnalysisPage';
+import SignUpPage from './pages/SignUpPage';
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/summary-practice" element={<SummaryPracticePage />} /> {/* 요약 연습하기 화면 */}
         <Route path="/quiz-results" element={<QuizResultPage />} /> {/* 퀴즈 결과 페이지 화면 */}
         <Route path="/learning-analysis" element={<LearningAnalysisPage />} /> {/* 학습 분석 페이지 화면 */}
+        <Route path="/sign-up" element={<SignUpPage />} /> {/* 회원가입 페이지 화면 */}
       </Routes>
     </div>
   );

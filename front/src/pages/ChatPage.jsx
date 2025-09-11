@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ChatPage.css';
 
-const ChatPage = () => {
+const ChatPage = ({ isPopup = false }) => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([
     { text: '안녕하세요, 무엇을 도와드릴까요?', sender: 'AI Tutor', avatar: 'path/to/ai-avatar-1.jpg' },
@@ -34,16 +34,18 @@ const ChatPage = () => {
 
   return (
     <div className="chat-container">
-      <header className="chat-header">
-        <h1 className="main-title">인공지능 선생님</h1>
-        <nav className="header-nav">
-          <a href="#">대시보드</a>
-          <a href="#">설정</a>
-          <a href="#">리포트</a>
-          <a href="#">로그아웃</a>
-          <img src="path/to/student-avatar.jpg" alt="Profile" className="profile-img" />
-        </nav>
-      </header>
+      {!isPopup && (
+        <header className="chat-header">
+          <h1 className="main-title">인공지능 선생님</h1>
+          <nav className="header-nav">
+            <a href="#">대시보드</a>
+            <a href="#">설정</a>
+            <a href="#">리포트</a>
+            <a href="#">로그아웃</a>
+            <img src="path/to/student-avatar.jpg" alt="Profile" className="profile-img" />
+          </nav>
+        </header>
+      )}
 
       <main className="chat-main">
         <div className="chat-messages">

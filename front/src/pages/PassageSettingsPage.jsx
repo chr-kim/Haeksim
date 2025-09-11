@@ -34,9 +34,15 @@ const PassageSettingsPage = () => {
         navigate('/quiz-page');
       }, 2000); // 2초는 API 요청 시간이나 데이터 처리 시간을 가정합니다.
 
-    } else {
-      // '지문의 핵심 파악하기' 선택 시
-      navigate('/dashboard'); // 다른 페이지로 이동 (예시)
+    } else if(features === '지문의 핵심 파악하기') {
+      // 2. 로딩 상태를 true로 설정하여 로딩 페이지를 화면에 띄웁니다.
+      setIsLoading(true);
+
+      // 3. 2초 후 로딩 상태를 false로 바꾸고 페이지를 이동합니다.
+      setTimeout(() => {
+        setIsLoading(false);
+        navigate('/summary-practice');
+      }, 2000); // 2초는 API 요청 시간이나 데이터 처리 시간을 가정합니다.
     }
   };
 
@@ -70,7 +76,7 @@ const PassageSettingsPage = () => {
           <a href="/dashboard">대시보드</a>
           <a href="#" className="active">설정</a>
           <a href="#">리포트</a>
-          <a href="#">로그아웃</a>
+          <a href="/">로그아웃</a>
           <img src="path/to/profile-image.jpg" alt="Profile" className="profile-img" />
         </nav>
       </header>
