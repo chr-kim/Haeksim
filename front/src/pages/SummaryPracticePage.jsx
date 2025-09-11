@@ -49,7 +49,7 @@ const SummaryPracticePage = () => {
           <a href="/dashboard">대시보드</a>
           <a href="#">설정</a>
           <a href="#">리포트</a>
-          <a href="/">로그아웃</a>
+          <a href="/page1">로그아웃</a>
           <img src="path/to/profile-image.jpg" alt="Profile" className="profile-img" />
         </nav>
       </header>
