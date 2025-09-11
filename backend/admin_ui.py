@@ -6,7 +6,7 @@ import json
 st.title("✍️ 문제 풀이 평가 시스템 (테스트 페이지)")
 
 # 입력 폼 생성
-problem_id = st.number_input("문제 ID", value=101)
+problem_id = st.number_input("문제 ID", value=1)
 user_answer_id = st.selectbox("선택 답안", [1, 2, 3, 4, 5])
 user_reasoning = st.text_area("답안 선택 근거를 입력하세요", height=200)
 

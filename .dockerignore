@@ -1,0 +1,28 @@
+# venv, 캐시 등 빌드에 불필요한 파일/폴더 제외
+backend/.venv/
+backend/__pycache__/
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.env
+backend/.DS_Store
+front/
+
+# 대형 데이터 폴더 전체 제외 (PDF 등 배포와 분리)
+backend/data/
+backend/**/*.Zone.Identifier
+
+# 테스트, 문서, 샘플 코드 등 제외 (폴더 명은 현 구조에 맞게 적합하게 변경)
+# backend/tests/
+# backend/docs/
+
+# IDE 메타파일 및 기타 오염 파일
+.idea/
+.vscode/
+*.log
+*.tmp
+
+# 개발/테스트 파일
+backend/tests/
+*.log
+*.tmp
+.DS_Store
