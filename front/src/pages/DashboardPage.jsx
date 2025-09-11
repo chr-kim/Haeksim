@@ -33,7 +33,7 @@ const DashboardPage = () => {
           <a href="#" className="active">대시보드</a>
           <a href="#">설정</a>
           <a href="#">리포트</a>
-          <a href="#">로그아웃</a>
+          <a href="/" style={{ cursor: 'pointer' }}>로그아웃</a>
           <img src="path/to/profile-image.jpg" alt="Profile" className="profile-img" />
         </nav>
       </header>

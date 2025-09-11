@@ -58,6 +58,7 @@ const Page1 = () => {
           <button 
             type="button" 
             className="login-button login-button-secondary"
+            onClick={() => navigate('/sign-up')}
           >
             회원가입
           </button>

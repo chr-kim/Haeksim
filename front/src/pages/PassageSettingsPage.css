@@ -2,7 +2,7 @@
 .passage-settings-container {
   background-color: #f7f9fc;
   min-height: 100vh;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
   color: #333;
 }
 
@@ -54,26 +54,29 @@
   font-size: 32px;
   color: #333;
   margin-bottom: 40px;
-  text-align: center; /* **이 부분을 가운데 정렬로 변경합니다.** */
+  text-align: center;
 }
 
 /* Setting Sections */
 .setting-section {
   margin-bottom: 30px;
-  text-align: left; /* 나머지 섹션은 모두 왼쪽 정렬로 유지 */
+  text-align: left;
 }
 
 .setting-section h2 {
   font-size: 20px;
   margin-bottom: 15px;
-  text-align: left; /* 섹션 제목 왼쪽 정렬 */
+  text-align: left;
 }
 
 /* Option Buttons */
 .option-group {
   display: flex;
   gap: 10px;
-  justify-content: flex-start; 
+  justify-content: flex-start; /* 버튼들을 왼쪽에서부터 정렬합니다 */
+  align-items: center;
+  flex-direction: row !important; /* !important를 사용하여 다른 규칙보다 우선시합니다 */
+  flex-wrap: nowrap; /* 버튼들이 한 줄에 유지되도록 설정합니다 */
 }
 
 .option-button {
@@ -84,6 +87,9 @@
   font-size: 16px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+  flex-grow: 0;
+  flex-shrink: 0;
+  /* max-width: 200px; - 버튼이 내용에 맞게 크기가 조절되도록 제거합니다 */
 }
 
 .option-button:hover {
@@ -142,7 +148,7 @@
 }
 
 .current-length {
-  text-align: left; /* 왼쪽 정렬 유지 */
+  text-align: left;
   font-size: 16px;
   color: #6c757d;
   margin-top: 5px;
