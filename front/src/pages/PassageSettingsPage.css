@@ -1,0 +1,190 @@
+/* Overall Page Layout */
+.passage-settings-container {
+  background-color: #f7f9fc;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: #333;
+}
+
+/* Header (from DashboardPage) */
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background-color: #e6f7f0;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-nav a {
+  text-decoration: none;
+  color: #6c757d;
+  font-weight: bold;
+}
+
+.header-nav a.active {
+  color: #333;
+}
+
+.profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+/* Main Content Area */
+.settings-main {
+  padding: 40px 10%;
+}
+
+.main-title {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+/* Setting Sections */
+.setting-section {
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.setting-section h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+/* Option Buttons */
+.option-group {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start; /* 버튼들을 왼쪽에서부터 정렬합니다 */
+  align-items: center;
+  flex-direction: row !important; /* !important를 사용하여 다른 규칙보다 우선시합니다 */
+  flex-wrap: nowrap; /* 버튼들이 한 줄에 유지되도록 설정합니다 */
+}
+
+.option-button {
+  padding: 12px 25px;
+  border: 1px solid #ced4da;
+  background-color: #fff;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  flex-grow: 0;
+  flex-shrink: 0;
+  /* max-width: 200px; - 버튼이 내용에 맞게 크기가 조절되도록 제거합니다 */
+}
+
+.option-button:hover {
+  background-color: #e9ecef;
+}
+
+.option-button.selected {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+/* Length Slider Section */
+.length-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.length-slider {
+  flex-grow: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  border-radius: 4px;
+}
+
+.length-slider:hover {
+  opacity: 1;
+}
+
+/* Slider thumb */
+.length-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  cursor: pointer;
+  border-radius: 50%;
+  border: none;
+}
+
+.length-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  cursor: pointer;
+  border-radius: 50%;
+  border: none;
+}
+
+.current-length {
+  text-align: left;
+  font-size: 16px;
+  color: #6c757d;
+  margin-top: 5px;
+  padding-left: 15px;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+}
+
+.btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-back {
+  background-color: #ced4da;
+  color: #333;
+}
+
+.btn-back:hover {
+  background-color: #adb5bd;
+}
+
+.btn-create {
+  background-color: #66a3d2;
+  color: #fff;
+}
+
+.btn-create:hover {
+  background-color: #558ebc;
+}
