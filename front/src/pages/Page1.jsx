@@ -1,27 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Page1.css'; // Make sure to import the CSS file
+import axios from 'axios';
+import './Page1.css';
 
 const Page1 = () => {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleLoginClick = () => {
-    // Implement your login logic here
-    // Dashboard page navigation after login
-    navigate('/dashboard');
-    // For now, let's just log a message
-    console.log("Login button clicked!");
-    // You can add navigation to another page after a successful login
-    // navigate('/dashboard'); 
+  const handleLoginClick = async () => {
+    setError('');
+
+    try {
+      // FastAPI 서버의 로그인 API 엔드포인트로 POST 요청
+      const response = await axios.post('http://192.168.45.219:8000/login', {
+        username: email,
+        password: password,
+      });
+
+      // 서버 응답 확인 (성공적으로 로그인된 경우)
+      if (response.status === 200) {
+        console.log("Login successful!", response.data);
+        // 성공 시 대시보드 페이지로 이동
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      // 에러 처리
+      if (err.response) {
+        console.error('Login failed:', err.response.data);
+        setError(err.response.data.detail || '로그인 중 오류가 발생했습니다.');
+      } else {
+        console.error('Network error:', err);
+        setError('네트워크 오류가 발생했습니다. 서버 상태를 확인해주세요.');
+      }
+    }
   };
 
   const handleKakaoLogin = () => {
-    // Logic for Kakao login
     console.log("Kakao login button clicked!");
   };
 
   const handleGoogleLogin = () => {
-    // Logic for Google login
     console.log("Google login button clicked!");
   };
 
@@ -39,16 +59,22 @@ const Page1 = () => {
           <input 
             type="text" 
             placeholder="Email or Username" 
-            className="login-input" 
+            className="login-input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <input 
             type="password" 
             placeholder="Password" 
-            className="login-input" 
+            className="login-input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
           
+          {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+
           <button 
-            type="submit" 
+            type="button" 
             className="login-button login-button-primary"
             onClick={handleLoginClick}
           >
