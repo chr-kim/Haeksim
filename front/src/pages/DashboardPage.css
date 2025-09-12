@@ -126,18 +126,21 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background-color: #e6f7f0; /* Light green background for the circle */
-  border: 5px solid #007bff; /* Blue border for progress visual */
+  
+  /* 배경을 코닉 그라데이션으로 설정합니다. */
+  background: conic-gradient(#007bff 288deg, #e6f7f0 0deg); 
+  
   display: flex;
   justify-content: center;
   align-items: center;
   margin-top: 20px;
+  border: none; /* 기존 border는 제거합니다 */
 }
 
 .progress-text {
   font-size: 24px;
   font-weight: bold;
-  color: #007bff;
+  color: #000000;
 }
 
 .cheer-up {

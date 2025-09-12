@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ChatPage from './ChatPage';
 import { useNavigate } from 'react-router-dom';
-import './SummaryPracticePage.css';
+
 
 const SummaryPracticePage = () => {
   const navigate = useNavigate();

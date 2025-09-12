@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './DashboardPage.css'; // Make sure to create this CSS file
+ // Make sure to create this CSS file
 
 const DashboardPage = () => {
   const navigate = useNavigate();
