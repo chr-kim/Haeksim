@@ -9,8 +9,10 @@ from .mapping_verify import verify_with_evidence
 import hashlib
 import unicodedata
 import math
+from app.routers import rag_similar
 
 app = FastAPI()
+app.include_router(rag_similar.router)
 
 # 프런트에서 오는 옵션
 class GenerateReq(BaseModel):
@@ -143,10 +145,12 @@ def generate(req: GenerateReq):
     # ★ 제목 및 DB Key
     title = (gen.get("title") or "").strip()
     db_key = make_db_key(title, passage_text)
+    question = (gen.get("question") or "위 글의 내용으로 적절한 것을 고르시오.").strip()
 
     result = {
         "title": title,
-        "db_key": db_key,                # 프런트/DB 저장용 키
+        "question": question,   
+        "db_key": db_key,
         "generated_passage": passage_text,
         "sentences": passage_sentences,
         "quality": llm_quality(passage_text, req.topic, key_points),
@@ -154,9 +158,10 @@ def generate(req: GenerateReq):
         "regen_count": 0,
         "difficulty": req.difficulty,
         "topic": req.topic,
-        "target_chars": req.target_chars
+        "target_chars": req.target_chars,
+        # ★ 여기 추가
+        "base_group_id": base.get("group_id") if base else None
     }
-
     if req.mode.upper() != "B":
         return result
 

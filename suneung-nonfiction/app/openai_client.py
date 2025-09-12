@@ -7,7 +7,7 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 MODEL = "gpt-4o-mini"
-EMBED_MODEL = "text-embedding-3-small"  # ← 임베딩 모델 추가
+EMBED_MODEL = "text-embedding-3-small"  # ← 임베딩 모델
 
 def _chat_json(messages: List[Dict[str, Any]], max_tokens: int = 3200) -> Dict[str, Any]:
     resp = client.chat.completions.create(
@@ -53,7 +53,7 @@ def llm_generate_with_evidence(mode: str, *, topic: str, difficulty: str, target
     """
     topic: 과학기술/인문/사회/예술/문학/시사 (프롬프트 힌트)
     difficulty: 기초/보통/어려움
-    target_chars: 800~1200자
+    target_chars: 권장 800~1200자
     """
     sent_min, sent_max, diff_rule = _difficulty_spec(difficulty)
     length_rule = f"{max(300, int(target_chars*0.9))}~{int(target_chars*1.1)}자(±10%)"
@@ -67,25 +67,28 @@ def llm_generate_with_evidence(mode: str, *, topic: str, difficulty: str, target
 - 문장 수: {sent_min}~{sent_max}문장, 각 문장은 마침표로 끝낼 것
 - 사실 발명 금지
 
-[제목 생성 규칙]
+[제목 규칙]
 - "title": 8~20자 내 핵심 명사구(한국어), 특수문자/따옴표/괄호/콜론 금지, 공백 2연속 금지
-- 예시: "의료 AI의 윤리 과제", "디지털 플랫폼과 자기표현"
 
-[출력 요구]
-1) "title": "..."   // ← 지문 제목(필수)
-2) "passage_sentences": [{{"id":1,"text":"..."}} ...]  // {sent_min}~{sent_max}개
-3) mode=="A"면 선지 생략. mode=="B"면 "choices" 5개:
-   - 정확히 1개 is_correct=true(정답), 나머지 false(오답)
-   - 정답 relation="support", 오답 relation="contradict"
-   - 각 선지는 지문 문장 1~2개에 직접 근거/모순되도록 "evidence_sent_ids":[...]
-   - 절대표현(항상/오직/전부 등)은 지문이 보편을 보장하지 않으면 쓰지 말 것
+[문두(질문) 규칙]
+- "question": 수능형 선택지 문제 질문 한 문장.
+- 기본형으로 고정: "위 글의 내용으로 적절한 것을 고르시오."
+- 오답 유도형(적절하지 않은 것) 금지. 정답은 정확히 1개만 is_correct=true.
+
+[선지 규칙(mode=="B"일 때)]
+- "choices"는 5개. 정확히 1개 is_correct=true(정답), 나머지 false(오답)
+- 정답 relation="support", 오답 relation="contradict"
+- 각 선지는 지문 문장 1~2개에 "직접" 근거/모순되도록 "evidence_sent_ids":[...]
+- 절대표현(항상/오직/전부 등) 남용 금지, 지문이 보편을 보장하지 않으면 쓰지 않기
 
 [최종 JSON 스키마]
 {{
   "title": "..." ,
+  "question": "위 글의 내용으로 적절한 것을 고르시오.",
   "passage_sentences": [{{"id":1,"text":"..."}} , ...],
   "choices": [  // mode B일 때만
-    {{"text":"...", "is_correct":true,  "relation":"support",    "evidence_sent_ids":[2]}}...
+    {{"text":"...", "is_correct":true,  "relation":"support",    "evidence_sent_ids":[2]}},
+    {{"text":"...", "is_correct":false, "relation":"contradict", "evidence_sent_ids":[3]}}
   ]
 }}
 
