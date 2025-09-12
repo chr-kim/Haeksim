@@ -1,6 +1,24 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './HomePage.css'; // 새로 생성될 CSS 파일 임포트
+import { useInView } from 'react-intersection-observer';
+
+
+// 각 섹션에 애니메이션 효과를 적용하는 컴포넌트
+const Section = ({ children, className }) => {
+  const { ref, inView } = useInView({
+    triggerOnce: true, // 한 번 보이면 다시 숨겨지지 않음
+    threshold: 0.1,    // 요소의 10%가 보이면 inView가 true가 됨
+  });
+
+  return (
+    <section 
+      ref={ref} 
+      className={`${className} animate-fade-in ${inView ? 'is-visible' : ''}`}
+    >
+      {children}
+    </section>
+  );
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -20,7 +38,7 @@ const Home = () => {
       {/* 메인 섹션 */}
       <main className="main-content">
         {/* 첫 번째 섹션: 환영 메시지 및 이미지 */}
-        <section className="section-welcome">
+        <Section className="section-welcome">
           <h2 className="title-welcome">
             <span>Haeksim</span>에 오신 것을 환영합니다!
           </h2>
@@ -30,7 +48,7 @@ const Home = () => {
           <div className="hero-image-container">
             <img src="https://placehold.co/800x600/F5F5DC/333333?text=Haeksim+Hero+Image" alt="AI Tutoring Illustration" className="hero-image" />
           </div>
-        </section>
+        </Section>
 
         <div className="separator-arrow">
           <div className="arrow-icon">
@@ -41,7 +59,7 @@ const Home = () => {
         </div>
 
         {/* 두 번째 섹션: 핵심 기능 소개 */}
-        <section className="section-features">
+        <Section className="section-features">
           <div className="feature-grid">
             <div className="feature-card">
               <h3 className="feature-title">실시간 피드백</h3>
@@ -56,10 +74,10 @@ const Home = () => {
               <p className="feature-text">학생 수준에 맞는 문제를 추천해 효과적인 학습을 지원합니다. AI가 교육의 균형을 맞춰줍니다.</p>
             </div>
           </div>
-        </section>
+        </Section>
 
         {/* 세 번째 섹션: 서비스 특징 */}
-        <section className="section-highlights">
+        <Section className="section-highlights">
           <h3 className="highlights-title">실력 향상에 필요한 모든 것</h3>
           <p className="highlights-subtitle">
             문제 풀이부터 오답 노트, 그리고 요약까지, Haeksim이 모든 것을 도와드립니다.
@@ -74,21 +92,21 @@ const Home = () => {
               <p className="highlight-text">문제를 푼 후 바로 나의 약점을 체크해 보세요! 문제 풀이뿐만 아니라 지문 요약을 통해 본인의 이해도를 체크할 수 있어요!</p>
             </div>
           </div>
-        </section>
+        </Section>
 
         {/* 네 번째 섹션: CTA */}
-        <section className="section-cta">
+        <Section className="section-cta">
           <h3 className="cta-title">AI 선생님과 함께, 맞춤 학습으로 성적 업그레이드!</h3>
           <p className="cta-text">
             지금 시작해 잠재력을 드러내세요!
           </p>
           <button
             className="cta-button"
-            onClick={() => navigate('/page1')} // 함수를 감싸서 전달
+            onClick={() => navigate('/page1')}
           >
             지금 바로 시작하기
           </button>
-        </section>
+        </Section>
       </main>
 
       {/* 푸터 */}

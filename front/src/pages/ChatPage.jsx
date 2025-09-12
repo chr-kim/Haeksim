@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './ChatPage.css';
+
 
 const ChatPage = ({ isPopup = false }) => {
   const navigate = useNavigate();
