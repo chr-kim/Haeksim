@@ -13,6 +13,11 @@
   align-items: center;
   padding: 15px 40px;
   background-color: #e6f7f0;
+  position: sticky; /* Make header sticky */
+  top: 0;
+  z-index: 100; /* Ensure it's above other content */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .logo {
@@ -47,16 +52,36 @@
 
 /* Main Content Area */
 .quiz-main {
-  padding: 40px 10%;
-  max-width: 1200px;
   margin: 0 auto;
+}
+
+.quiz-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  padding: 20px 40px;
+  max-width: 1800px; /* Increased for better wide-screen experience */
+  margin: 0 auto;
+}
+
+.quiz-problem-panel {
+  position: sticky;
+  top: 90px; /* Height of header + some padding */
+  align-self: start;
+  height: calc(100vh - 110px); /* Adjust height to fit viewport */
+  overflow-y: auto;
+  padding-right: 20px;
+}
+
+.quiz-answer-panel {
+  /* This panel will scroll naturally */
 }
 
 .main-title {
   font-size: 28px;
   color: #333;
-  text-align: center;
   margin-bottom: 20px;
+  text-align: left;
 }
 
 /* Passage Section */
@@ -65,7 +90,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   padding: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   line-height: 1.6;
   font-size: 15px;
 }
@@ -83,7 +108,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   padding: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .mc-prompt {
@@ -140,7 +165,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   padding: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .sa-input-group {
@@ -151,6 +176,7 @@
   display: block;
   font-weight: bold;
   margin-bottom: 10px;
+  line-height: 1.5; /* Adjust for longer labels */
 }
 
 .sa-input-group textarea {

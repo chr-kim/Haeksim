@@ -19,6 +19,12 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # A타입 품질 지표(기존 generate()와 동일 유틸 재사용)
 from app.openai_client import llm_quality  # noqa
 
+# ==== RAGAS ====
+from ragas import evaluate as ragas_evaluate
+from ragas.metrics import faithfulness, answer_relevancy
+from datasets import Dataset
+import pandas as pd  # ragas result를 pandas로 다루기 위함
+
 router = APIRouter(prefix="/rag", tags=["rag"])
 
 # ====== 데이터/인덱스 경로 ======
@@ -64,7 +70,7 @@ def get_index_and_meta() -> Tuple[faiss.Index, List[Dict[str, Any]]]:
         _metadata = load_metadata(META_PATH)
     return _faiss_index, _metadata
 
-# ====== 스키마 (필수 필드만 유지) ======
+# ====== 스키마 ======
 class GenerateSimilarRequest(BaseModel):
     current_passage: str = Field(..., description="사용자가 방금 읽은 지문(원문)")
     difficulty_reason: str = Field(..., description="사용자가 느낀 어려움의 이유(예: 용어 난이도/논리 전개/예시 전환 속도)")
@@ -74,7 +80,6 @@ class GenerateSimilarRequest(BaseModel):
     min_score: Optional[float] = Field(default=0.22, description="코사인 유사도 하한(0~1)")
     temperature: float = Field(default=0.4, ge=0.0, le=2.0)
 
-# ====== A타입 화면과 동일한 응답 구조 ======
 class ATypeLikeResponse(BaseModel):
     title: str
     db_key: str
@@ -103,10 +108,13 @@ class ATypeLikeResponse(BaseModel):
     query_eval: Optional[Dict[str, Any]] = None
     queries_used: Optional[List[str]] = None
 
-        # ★ 추가
-    final_query: Optional[str] = None                   # 실제 검색에 사용된 메인 쿼리
-    query_eval_before: Optional[Dict[str, Any]] = None  # 개선 전 점수
-    query_eval_after: Optional[Dict[str, Any]] = None   # 개선 후 점수(= query_eval과 동일)
+    # 추가(최종 선택/전후 점수)
+    final_query: Optional[str] = None
+    query_eval_before: Optional[Dict[str, Any]] = None
+    query_eval_after: Optional[Dict[str, Any]] = None
+
+    # ★ RAGAS 결과
+    ragas: Optional[Dict[str, float]] = None
 
 def _l2_normalize(x: np.ndarray) -> np.ndarray:
     return x / (np.linalg.norm(x, axis=1, keepdims=True) + 1e-12)
@@ -127,7 +135,7 @@ def to_sentences(text: str) -> List[Dict[str, Any]]:
     parts = [p.strip() for p in _SENT_SPLIT.split(text.strip()) if p.strip()]
     return [{"id": i+1, "text": s} for i, s in enumerate(parts)]
 
-# ====== 1) 쿼리 리라이트 (학습 지향) ======
+# ====== 1) 쿼리 리라이트 ======
 REASON_SYSTEM_PROMPT = """역할: 국어 비문학 학습 코치이자 검색 전문가.
 입력: '현재 지문'과 '어려웠던 이유'.
 목표: 학습(이해) 중심 RAG가 잘 되도록, '학습 목표'와 '핵심 개념'을 반영한 검색 쿼리를 작성.
@@ -179,7 +187,7 @@ def rewrite_query(current_passage: str, difficulty_reason: str) -> Dict[str, Any
             "should_avoid": []
         }
 
-# ====== 2) 쿼리 평가/리파인 (AdvancedRAG 요지) ======
+# ====== 2) 쿼리 평가/리파인 ======
 QUERY_EVAL_SYSTEM = """역할: RAG 검색 쿼리 평가자/코치. 반드시 JSON만 출력.
 평가기준(0~1): coverage(핵심개념 포함도), clarity(명료성), specificity(구체성),
 goal_alignment(학습목표 부합도), noise(불필요어/모순/금지요소; 낮을수록 좋음).
@@ -245,12 +253,10 @@ def eval_and_refine_query(
             "variants": [],
             "hyde": ""
         }
-    # variants 제한
     vs = list(data.get("variants") or [])
     data["variants"] = vs[:max(0, n_variants-1)]
     if not enable_hyde:
         data["hyde"] = ""
-    # must_have는 항상 포함 보정
     base_q = (data.get("improved",{}) or {}).get("query") or rewritten.get("query","")
     mh = (data.get("improved",{}) or {}).get("must_have") or rewritten.get("must_have") or []
     (data["improved"] or {}).update({"query": ensure_terms(base_q, mh)})
@@ -283,7 +289,7 @@ def retrieve_similar(queries: List[str], top_k: int, exclude_group_ids: List[str
     results = sorted(agg.values(), key=lambda x: x["_score"], reverse=True)[:top_k]
     return results
 
-# ====== 4) 컨텍스트 블록 (점수/매칭쿼리 표시) ======
+# ====== 4) 컨텍스트 블록 ======
 def build_context_block(items: List[Dict[str, Any]]) -> str:
     lines = []
     for it in items:
@@ -361,7 +367,47 @@ def generate_study(difficulty_reason: str, rewritten: Dict[str, Any], contexts: 
             "difficulty_note": "—"
         }
 
-# ====== 6) 엔드포인트 (A타입 구조 반환) ======
+# ====== 6) RAGAS 유틸 ======
+def run_ragas(question: str, answer: str, contexts: List[str]) -> Dict[str, float]:
+    """
+    RAGAS 평가: (레퍼런스 불필요) faithfulness / answer_relevancy
+    + proxy: answer_ctx_sim (답변과 컨텍스트 임베딩 평균 유사도)
+    """
+    # --- RAGAS (레퍼런스 불필요 지표만) ---
+    ds = Dataset.from_dict({
+        "question": [question],
+        "answer":   [answer],
+        "contexts": [contexts],
+    })
+    result = ragas_evaluate(ds, metrics=[faithfulness, answer_relevancy])
+
+    # pandas 변환
+    df = result.to_pandas() if hasattr(result, "to_pandas") else pd.DataFrame(result)
+    row = df.iloc[0].to_dict()
+
+    scores: Dict[str, float] = {}
+    for k in ["faithfulness", "answer_relevancy"]:
+        if k in row and row[k] is not None:
+            scores[k] = float(row[k])
+
+    # --- Proxy: 답변–컨텍스트 임베딩 평균 유사도 ---
+    try:
+        av = embed_texts([answer]).astype(np.float32)
+        cv = embed_texts(contexts).astype(np.float32) if contexts else None
+        if cv is not None and len(cv):
+            av = av / (np.linalg.norm(av, axis=1, keepdims=True) + 1e-12)
+            cv = cv / (np.linalg.norm(cv, axis=1, keepdims=True) + 1e-12)
+            sims = (cv @ av.T).squeeze(-1)  # 코사인 유사도
+            scores["answer_ctx_sim"] = float(np.clip(np.mean(sims), -1.0, 1.0))
+    except Exception:
+        # 임베딩 실패 시 프록시 생략
+        pass
+
+    if scores:
+        scores["mean_score"] = float(np.mean(list(scores.values())))
+    return scores
+
+# ====== 7) 엔드포인트 ======
 @router.post("/generate_similar", response_model=ATypeLikeResponse)
 def generate_similar_problem(req: GenerateSimilarRequest) -> ATypeLikeResponse:
     if not req.current_passage.strip():
@@ -381,7 +427,7 @@ def generate_similar_problem(req: GenerateSimilarRequest) -> ATypeLikeResponse:
     orig_q = (rewritten.get("query") or "").strip()
     impr_q = ((refine.get("improved") or {}).get("query") or orig_q).strip()
 
-    # ★ 동일 조건으로 개선안 재평가(힌트 포함)
+    # 동일 조건으로 개선안 재평가
     improved_json = {
         "query": impr_q,
         "must_have": (refine.get("improved") or {}).get("must_have") or rewritten.get("must_have") or [],
@@ -394,9 +440,7 @@ def generate_similar_problem(req: GenerateSimilarRequest) -> ATypeLikeResponse:
     query_eval_after = eval_after.get("score", {}) or {}
     overall_after = float(query_eval_after.get("overall", 0.0))
 
-    # 2.5) 최종 쿼리 선택 규칙
-    # - 임계값 미달이면 개선안 우선, 단 현저히 악화되면(>0.05) 원본 유지
-    # - 임계값 이상이면 개선안이 소폭 이상 개선(>=0.02)일 때만 교체
+    # 최종 쿼리 선택 규칙
     DEGRADED_MARGIN = 0.05
     IMPROVE_DELTA = 0.02
     if overall_before < QUERY_PASS_THRESHOLD:
@@ -465,6 +509,19 @@ def generate_similar_problem(req: GenerateSimilarRequest) -> ATypeLikeResponse:
                 "matched_query": it.get("_q", "")
             })
 
+    # ★ RAGAS 평가 실행
+    ctx_texts = []
+    for it in cand:
+        txt = (it.get("passage") or it.get("content") or "")[:1200]  # 과도한 길이 방지
+        if txt:
+            ctx_texts.append(txt)
+    ragas_scores = run_ragas(
+        question=(main_q or "").strip(),
+        answer=generated_passage.strip(),
+        contexts=ctx_texts
+    )
+    ragas_scores = {k: round(float(v), 3) for k, v in ragas_scores.items()} if ragas_scores else None
+
     fmt = lambda d: {k: round(float(v), 3) for k, v in (d or {}).items()}
 
     return ATypeLikeResponse(
@@ -492,7 +549,8 @@ def generate_similar_problem(req: GenerateSimilarRequest) -> ATypeLikeResponse:
         query_eval=fmt(final_eval),               # 최종 선택의 점수
         query_eval_before=fmt(query_eval_before), # 개선 전
         query_eval_after=fmt(query_eval_after),   # 개선 후
-        queries_used=queries
+        queries_used=queries,
+
+        # ★ RAGAS 결과
+        ragas=ragas_scores
     )
-
-

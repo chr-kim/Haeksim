@@ -1,35 +1,29 @@
-# app/main.py
+from fastapi import APIRouter
+from typing import Dict, Any
+from ..schemas import GenerateReq
+# 아래 유틸/서비스는 현 main.py와 동일 import 경로 유지
+from ..repo import sample_nonfiction
+from ..openai_client import llm_generate_with_evidence, llm_quality, call_json, embed_texts
+from ..mapping_verify import verify_with_evidence
+import re
+import hashlib
+import unicodedata
+# 👉 기존 app/main.py에 있던 상수/유틸 일부를 이 파일로 복사
+# (DIFF_TO_GRADE, SIM_THRESHOLD, trim_evidence_by_similarity 등)
+
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
-import re
-from .repo import sample_nonfiction
-from .openai_client import llm_generate_with_evidence, llm_quality, call_json, embed_texts
-from .mapping_verify import verify_with_evidence
-import hashlib
-import unicodedata
 import math
 from app.routers import rag_similar
 
-app = FastAPI()
-app.include_router(rag_similar.router)
-
-# 프런트에서 오는 옵션
-class GenerateReq(BaseModel):
-    mode: str                          # "A" | "B"
-    difficulty: str = Field(..., description="기초|보통|어려움")
-    topic: str = Field(..., description="과학기술|인문|사회|예술/문학|시사")
-    target_chars: int = Field(..., ge=200, le=2000, description="지문 길이(문자 수) 800~1200 권장")
-
-# 난이도 → 학년 라벨 매핑(ingest에서 grade_level 라벨로 입력)
 DIFF_TO_GRADE = {"기초": "고1", "보통": "고2", "어려움": "고3"}
 
 MAX_REPAIR_ROUNDS = 2
 MAX_REGENERATE   = 1
 
-# [EMBED] 임베딩 기반 리랭킹 on/off 및 임계값
 USE_EMBED_RERANK = True
-SIM_THRESHOLD    = 0.22  # 0.18~0.30 사이 튜닝 권장
+SIM_THRESHOLD    = 0.22
 
 def rewrite_choice_with_evidence(passage_sentences: List[Dict[str,str]], choice: Dict[str,Any], must: str) -> str:
     sents = {s["id"]: s["text"] for s in passage_sentences}
@@ -48,7 +42,6 @@ def rewrite_choice_with_evidence(passage_sentences: List[Dict[str,str]], choice:
     new_text = out.get("text") or choice.get("text","")
     return new_text.strip()
 
-# 제목 → Key 변환 유틸
 def make_db_key(title: str, passage_text: str) -> str:
     """
     - 한글/영문/숫자/하이픈만 허용, 공백은 하이픈으로
@@ -67,7 +60,6 @@ def make_db_key(title: str, passage_text: str) -> str:
     h = hashlib.sha1((passage_text or "").encode("utf-8")).hexdigest()[:8]
     return f"{t}-{h}" if t else f"untitled-{h}"
 
-# 기존: 표면 토큰 겹침 기반
 def trim_evidence_by_overlap(choice_text: str, sentences: List[Dict[str, str]], ev_ids: List[int], max_keep: int = 2) -> List[int]:
     valid_ids = {int(s["id"]) for s in sentences}
     ev_ids = [int(i) for i in ev_ids if int(i) in valid_ids]
@@ -90,7 +82,6 @@ def _cosine(a, b):
     nb = math.sqrt(sum(y*y for y in b)) or 1e-9
     return dot / (na * nb)
 
-# [EMBED] 임베딩 기반 리랭크 + 진단치
 def trim_evidence_by_similarity(choice_text: str, sentences: List[Dict[str, str]], ev_ids: List[int], max_keep: int = 2, min_sim: float = SIM_THRESHOLD):
     """
     1) choice_text + 후보 evidence 문장들 임베딩
@@ -122,7 +113,12 @@ def trim_evidence_by_similarity(choice_text: str, sentences: List[Dict[str, str]
     picked = ranked[:max_keep]
     return picked, {"method":"embed", "picked":picked, "sims":{str(k): round(v,4) for k,v in sims.items()}}
 
-@app.post("/generate")
+
+router = APIRouter(tags=["items"])
+
+# ===== 여기에 app/main.py의 generate() 본문을 그대로 옮겨 붙이세요 =====
+# 엔드포인트 경로만 바꿉니다: /api/v1/items/generate
+@router.post("/items/generate")
 def generate(req: GenerateReq):
     # 0) 난이도→학년/주제 필터로 베이스 지문 샘플
     base = sample_nonfiction(

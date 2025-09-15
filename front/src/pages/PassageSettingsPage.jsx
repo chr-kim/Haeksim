@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import LoadingPage from './LoadingPage'; // 로딩 페이지 컴포넌트 임포트
+import './PassageSettingsPage.css'; // 스타일 import
 
 // 환경 변수에서 API 주소 불러오기
 const API_URL = "https://unstylized-ineloquently-chiquita.ngrok-free.app";
@@ -11,7 +12,7 @@ const PassageSettingsPage = () => {
 
   const [difficulty, setDifficulty] = useState('어려움');
   const [topic, setTopic] = useState('과학기술');
-  const [features, setFeatures] = useState('지문의 핵심 파악하기');
+  const [features, setFeatures] = useState('지문요약 핵심파악');
   const [passageLength, setPassageLength] = useState(1000);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +20,7 @@ const PassageSettingsPage = () => {
 
   const difficultyOptions = ['기초', '보통', '어려움'];
   const topicOptions = ['과학기술', '인문', '사회', '예술/문화', '시사'];
-  const featureOptions = ['실제 문제 풀이', '지문의 핵심 파악하기'];
+  const featureOptions = ['선지 분석 & 논리 평가', '지문요약 핵심파악'];
   
   const minLength = 800;
   const maxLength = 1200;
@@ -44,11 +45,11 @@ const PassageSettingsPage = () => {
 
       const responseData = response.data;
 
-      if (features === '실제 문제 풀이') {
+      if (features === '선지 분석 & 논리 평가') {
         // 실제 문제 풀이 데이터 형식: { passage: "...", choices: ["...", "...", ...] }
         // navigate의 state를 통해 다음 페이지로 데이터 전달
         navigate('/quiz-page', { state: { quizData: responseData } });
-      } else if (features === '지문의 핵심 파악하기') {
+      } else if (features === '지문요약 핵심파악') {
         // 지문의 핵심 파악하기 데이터 형식: { passage: "..." }
         navigate('/summary-practice', { state: { passageData: responseData } });
       }
@@ -94,57 +95,57 @@ const PassageSettingsPage = () => {
       </header>
 
       <main className="settings-main">
-        <h1 className="main-title">지문 설정</h1>
+        <div className="settings-card">
+          <h1 className="main-title">AI 맞춤형 학습 설정</h1>
 
-        <section className="setting-section">
-          <h2>지문 난이도 설정</h2>
-          <div className="option-group">
-            {renderOptionButtons(difficultyOptions, difficulty, setDifficulty)}
-          </div>
-        </section>
-        
-        <section className="setting-section">
-          <h2>주제 선택</h2>
-          <div className="option-group">
-            {renderOptionButtons(topicOptions, topic, setTopic)}
-          </div>
-        </section>
+          <section className="setting-section">
+            <h2>학습 난이도 선택</h2>
+            <div className="option-group">
+              {renderOptionButtons(difficultyOptions, difficulty, setDifficulty)}
+            </div>
+          </section>
+          
+          <section className="setting-section">
+            <h2>관심 주제 영역</h2>
+            <div className="option-group">
+              {renderOptionButtons(topicOptions, topic, setTopic)}
+            </div>
+          </section>
 
-        <section className="setting-section">
-          <h2>기능 선택</h2>
-          <div className="option-group">
-            {renderOptionButtons(featureOptions, features, setFeatures)}
-          </div>
-        </section>
+          <section className="setting-section">
+            <h2>학습 방식 선택</h2>
+            <div className="option-group">
+              {renderOptionButtons(featureOptions, features, setFeatures)}
+            </div>
+          </section>
 
-        <section className="setting-section">
-          <h2>지문 길이 설정</h2>
-          <div className="length-slider-container">
-            <span>{minLength}자</span>
-            <input
-              type="range"
-              min={minLength}
-              max={maxLength}
-              value={passageLength}
-              onChange={(e) => setPassageLength(Number(e.target.value))}
-              className="length-slider"
-            />
-            <span>{maxLength}자</span>
-          </div>
-          <div className="current-length">
-            현재 설정: {passageLength}자
-          </div>
-        </section>
+          <section className="setting-section">
+            <h2>지문 길이 설정</h2>
+            <div className="length-slider-container">
+              <input
+                type="range"
+                min={minLength}
+                max={maxLength}
+                value={passageLength}
+                onChange={(e) => setPassageLength(Number(e.target.value))}
+                className="length-slider"
+              />
+            </div>
+            <div className="current-length">
+              현재 설정: {passageLength}자
+            </div>
+          </section>
 
-        <div className="action-buttons">
-          <button className="btn btn-back" onClick={handleGoBack}>
-            뒤로 가기
-          </button>
-          <button className="btn btn-create" onClick={handleCreatePassage} disabled={isLoading}>
-            {isLoading ? '생성 중...' : '생성 시작'}
-          </button>
+          <div className="action-buttons">
+            <button className="btn btn-back" onClick={handleGoBack}>
+              뒤로 가기
+            </button>
+            <button className="btn btn-create" onClick={handleCreatePassage} disabled={isLoading}>
+              {isLoading ? '생성 중...' : '생성 시작'}
+            </button>
+          </div>
+          {error && <p className="error-message">{error}</p>}
         </div>
-        {error && <p className="error-message">{error}</p>}
       </main>
     </div>
   );
