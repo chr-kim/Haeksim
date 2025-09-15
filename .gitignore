@@ -208,3 +208,6 @@ __marimo__/
 
 # .env 파일은 민감한 정보를 담고 있으므로 Git 추적에서 제외합니다.
 .env
+# 개인용 스크립트는 제외하고 싶다면
+sync_folders.zsh
+*.local.zsh
