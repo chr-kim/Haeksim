@@ -1,28 +1,33 @@
-# venv, 캐시 등 빌드에 불필요한 파일/폴더 제외
+# Git & IDE
+.git
+.github
+.idea/
+.vscode/
+
+# OS & Temp files
+.DS_Store
+*.log
+*.tmp
+backend/**/*.Zone.Identifier
+
+# Python Caches & Virtual Env
+__pycache__/
+*.pyc
+.venv
 backend/.venv/
 backend/__pycache__/
 backend/.pytest_cache/
 backend/.mypy_cache/
-backend/.env
-backend/.DS_Store
+
+# Node.js dependencies
+node_modules/
+front/node_modules/
+
+# Exclude other project parts
 front/
+suneung-nonfiction/
 
-# 대형 데이터 폴더 전체 제외 (PDF 등 배포와 분리)
+# Exclude backend data & tests from image
 backend/data/
-backend/**/*.Zone.Identifier
-
-# 테스트, 문서, 샘플 코드 등 제외 (폴더 명은 현 구조에 맞게 적합하게 변경)
-# backend/tests/
-# backend/docs/
-
-# IDE 메타파일 및 기타 오염 파일
-.idea/
-.vscode/
-*.log
-*.tmp
-
-# 개발/테스트 파일
 backend/tests/
-*.log
-*.tmp
-.DS_Store
+backend/.env
