@@ -31,7 +31,7 @@ print(f"🔑 API Key starts with: {GOOGLE_API_KEY[:10] if GOOGLE_API_KEY else 'N
 generation_config = types.GenerateContentConfig(
     response_mime_type="application/json",
     temperature=0.7,  # 창의성과 일관성 균형
-    max_output_tokens=1024,  # 충분한 응답 길이
+    max_output_tokens=2048,  # 충분한 응답 길이
     top_p=0.8,  # 응답 품질 제어
     top_k=40   # 토큰 선택 다양성 제어
 )
