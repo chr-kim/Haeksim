@@ -1,8 +1,11 @@
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
+from dotenv import load_dotenv
+import os
 
-SECRET_KEY = "change-me-in-env"
+load_dotenv()
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGO = "HS256"
 ACCESS_TOKEN_EXPIRE_MIN = 60 * 24
 

@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom'; // useLocation 추가
 import ChatPage from "./ChatPage";
 import './QuizPage.css';
 
 const QuizPage = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // location 객체 가져오기
 
-  const options = [
-    'AI를 교육에 적용하면 어떤 위험이 발생할 수 있는지에 대해 중점적으로 다루는 글이다.',
-    'AI는 교육을 완전히 변화시켜서 교사의 역할은 중요하지 않다고 주장하는 글이다.',
-    'AI가 교육에 가져올 긍정적인 효과와 부정적인 측면을 모두 균형 있게 다루는 글이다.',
-    'AI를 교육에 도입할 때 필요한 기술적 준비에 대해 자세히 설명하는 글이다.',
-    'AI가 교육에 가져올 긍정적인 효과만을 강조하며 도입을 촉구하는 글이다.'
-  ];
+  // location.state에서 quizData 추출
+  const quizData = location.state?.quizData;
+
+  // State for the passage, title and options
+  const [title, setTitle] = useState('');
+  const [passage, setPassage] = useState('');
+  const [options, setOptions] = useState([]);
+  
   const option_numbers = ['①', '②', '③', '④', '⑤'];
 
   // State for the selected multiple-choice answer
@@ -29,8 +31,26 @@ const QuizPage = () => {
   // State to track completed questions for progress bar
   const [completedQuestions, setCompletedQuestions] = useState(0);
 
+  // Set data from location state when component mounts
+  useEffect(() => {
+    if (quizData) {
+      // API 응답 형식에 맞게 데이터 설정
+      setTitle(quizData.title || '제목 없음');
+      setPassage(quizData.passage || '내용 없음');
+      setOptions(quizData.choices || []);
+      setAnswers(new Array(quizData.choices?.length || 5).fill(''));
+    } else {
+      // quizData가 없을 경우 (예: 페이지 직접 접근)
+      setTitle('오류');
+      setPassage('퀴즈 데이터를 불러올 수 없습니다. 설정 페이지에서 다시 시도해주세요.');
+      setOptions([]);
+    }
+  }, [quizData]);
+
+
   // Check if all answers are filled whenever `answers` state changes
   useEffect(() => {
+    if (!answers.length) return;
     // 모든 서술형 답안과 객관식 답안이 모두 채워졌는지 확인
     const allShortAnswersFilled = answers.every(answer => answer.trim() !== '');
     const isMultipleChoiceSelected = selectedAnswer !== null;
@@ -79,14 +99,7 @@ const QuizPage = () => {
     setShowChat((prev) => !prev);
   };
 
-  const handleStartNew = () => {
-    // Reset all state for a new problem
-    setSelectedAnswer(null);
-    setAnswers(['', '', '', '', '']);
-    console.log("새 문제 생성 버튼 클릭!");
-  };
-
-  const totalQuestions = 6; // 5 short answers + 1 multiple choice
+  const totalQuestions = (options?.length || 0) + 1; // short answers + 1 multiple choice
 
   return (
     <div className="quiz-container">
@@ -106,36 +119,13 @@ const QuizPage = () => {
       <main className="quiz-main">
         <div className="quiz-content-grid">
           <div className="quiz-problem-panel">
-            <h1 className="main-title">The Impact of AI on Education</h1>
+            <h1 className="main-title">{title}</h1>
             
 
             {/* Passage Section */}
             <section className="passage-section">
               <p>
-                Artificial intelligence (AI) is rapidly transforming various sectors, and education is no exception. AI-powered tools are being
-                integrated into classrooms to personalize learning experiences, automate administrative tasks, and provide data-driven insights.
-                This essay explores the potential benefits and challenges of integrating AI into education, focusing on its impact on
-                student learning, teaching practices, and institutional management. One of the primary benefits is the ability to
-                offer personalized learning pathways. AI can analyze a student's performance and learning style to provide tailored
-                content, suggesting resources, and adjusting the pace and content of instruction accordingly. This personalized approach can lead to improved
-                learning outcomes and increased engagement, especially for students who may struggle with traditional teaching methods.
-                For example, AI-powered tutoring systems can provide targeted feedback and support, helping students master concepts
-                at their own pace. Furthermore, AI can assist teachers with time-consuming tasks such as grading assignments and tracking
-                student progress. This allows teachers to focus more on interacting with students, designing innovative lessons, and providing
-                one-on-one support. From an administrative perspective, AI can streamline processes such
-                as scheduling, enrollment, and resource allocation, making educational institutions more efficient. However, the integration of AI in
-                education also presents significant challenges. One concern is the potential for bias in AI algorithms, which could perpetuate
-                and even amplify existing educational inequalities. If AI systems are trained on biased data, they may lead to inaccurate
-                or unfair assessments of student performance, leading to unequal access to resources and opportunities. Another challenge
-                is the ethical use of student data. As AI systems collect vast amounts of personal information, ensuring
-                data privacy and security is paramount. Educators and institutions must also receive adequate professional development programs
-                are essential to ensure that teachers can leverage the benefits of AI while mitigating its risks. The human element
-                in education cannot be replaced by technology. The role of the teacher as a mentor, facilitator, and
-                emotional supporter remains crucial. Effective implementation of AI requires a collaborative approach that prioritizes the
-                responsible use of AI technologies. In conclusion, AI has the potential to revolutionize education by personalizing learning,
-                automating tasks, and streamlining management. However, its successful integration depends on addressing critical ethical
-                implications, bias mitigation, and teacher training to ensure that AI is implemented in a way that promotes equity
-                and enhances the human-centered nature of education.
+                {passage}
               </p>
             </section>
 
@@ -166,7 +156,7 @@ const QuizPage = () => {
             <section className="short-answer-section">
               <div className="short-answer-title">선택지별 근거 작성</div>
               <div className="short-answer-description">
-                각 선택지에 대한 근거를 서술하세요. (5문제)
+                각 선택지에 대한 근거를 서술하세요. ({options.length}문제)
               </div>
               {options.map((option, index) => (
                 <div key={index + 1} className="sa-input-group-container">
@@ -174,12 +164,12 @@ const QuizPage = () => {
                     <label><strong>{`${option_numbers[index]} ${option}`}</strong>에 대한 근거</label>
                     <textarea
                       placeholder="이 선택지를 고른 이유(근거)를 지문에서 찾아 작성해주세요."
-                      value={answers[index]}
+                      value={answers[index] || ''}
                       onChange={(e) => handleInputChange(index, e)}
                       rows="5"
                     ></textarea>
                   </div>
-                  <div className="char-count">작성 글자 수: {answers[index].length}자</div>
+                  <div className="char-count">작성 글자 수: {answers[index]?.length || 0}자</div>
                 </div>
               ))} 
             </section>

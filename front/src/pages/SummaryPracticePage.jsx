@@ -1,15 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ChatPage from './ChatPage';
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate, useLocation } from 'react-router-dom';
+import './SummaryPracticePage.css';
 
 const SummaryPracticePage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [title, setTitle] = useState('');
+  const [passage, setPassage] = useState('');
   const [summaryText, setSummaryText] = useState('');
   const [fontSize, setFontSize] = useState(16);
   const [showChat, setShowChat] = useState(false);
 
-  const passage = "The rapid advancement of artificial intelligence (AI) has revolutionized numerous sectors, from healthcare to finance. AI systems, powered by machine learning algorithms, can analyze vast datasets to identify patterns and make predictions with remarkable accuracy. This capability has led to the development of sophisticated tools for medical diagnosis, fraud detection, and personalized education. However, the increasing reliance on AI also raises ethical concerns, particularly regarding data privacy and algorithmic bias. As AI continues to evolve, it is crucial to establish clear guidelines and regulations to ensure its responsible and equitable deployment. (지문)";
+  useEffect(() => {
+    const passageData = location.state?.passageData;
+    if (passageData) {
+      setTitle(passageData.title || '제목 없음');
+      setPassage(passageData.passage || '내용 없음');
+    } else {
+      setTitle('오류');
+      setPassage('지문 데이터를 불러올 수 없습니다. 설정 페이지에서 다시 시도해주세요.');
+    }
+  }, [location.state]);
 
   const handleFontSizeIncrease = () => {
     setFontSize(prevSize => Math.min(prevSize + 2, 24));
@@ -57,7 +70,7 @@ const SummaryPracticePage = () => {
       {/* Main Content */}
       <main className="summary-main">
         <div className="passage-header">
-          <h1 className="main-title">제목</h1>
+          <h1 className="main-title">{title}</h1>
           <div className="font-size-controls">
             <span>글자크기: {fontSize}pt</span>
             <button onClick={handleFontSizeIncrease} className="font-size-btn">+</button>
